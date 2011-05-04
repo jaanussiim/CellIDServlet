@@ -1,0 +1,8 @@
+build.dir=${basedir}/build
+classes.dir=${build.dir}/classes
+src.dir=${basedir}/src
+libs.dir=${basedir}/libs
+war.dir=${build.dir}/war
+etc.dir=${basedir}/etc
+
+path.to.android.home=/Users/jaanus/dev/android-sdk-mac_86

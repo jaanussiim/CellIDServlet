@@ -1,0 +1,49 @@
+<project basedir="." name="CellIDServlet" default="dist">
+    <property file="build.properties"/>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac target="1.5" debug="true" destdir="${classes.dir}" encoding="UTF-8" source="1.5" srcdir="${src.dir}">
+            <classpath>
+                <pathelement path="${path.to.android.home}/platforms/android-3/android.jar"/>
+                <pathelement path="${libs.dir}/servlet-api-2.5-20081211.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="dex.classes">
+        <exec command="${path.to.android.home}/platform-tools/dx">
+            <arg value="--dex"/>
+            <arg value="--verbose"/>
+            <arg value="--core-library"/>
+            <arg value="--output=${build.dir}/classes.dex"/>
+            <arg value="--positions=lines"/>
+            <arg value="${classes.dir}"/>
+        </exec>
+    </target>
+
+    <target name="make.war">
+        <mkdir dir="${war.dir}"/>
+        <property name="web.inf" value="${war.dir}/WEB-INF"/>
+
+        <mkdir dir="${web.inf}"/>
+        <copy file="${etc.dir}/web.xml" todir="${web.inf}"/>
+
+        <mkdir dir="${web.inf}/lib"/>
+        <jar destfile="${web.inf}/lib/classes.zip" compress="false">
+            <fileset dir="${build.dir}">
+                <include name="classes.dex"/>
+            </fileset>
+        </jar>
+        <jar basedir="${web.inf}" destfile="${build.dir}/cellid_servlet.war"/>
+    </target>
+
+    <target name="dist" depends="clean, compile, dex.classes, make.war"/>
+</project>
