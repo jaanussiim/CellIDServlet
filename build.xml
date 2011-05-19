@@ -14,6 +14,7 @@
             <classpath>
                 <pathelement path="${path.to.android.home}/platforms/android-3/android.jar"/>
                 <pathelement path="${libs.dir}/servlet-api-2.5-20081211.jar"/>
+                <pathelement path="${libs.dir}/gson-1.7.1.jar"/>
             </classpath>
         </javac>
     </target>
@@ -26,6 +27,7 @@
             <arg value="--output=${build.dir}/classes.dex"/>
             <arg value="--positions=lines"/>
             <arg value="${classes.dir}"/>
+            <arg value="${libs.dir}/gson-1.7.1.jar"/>
         </exec>
     </target>
 

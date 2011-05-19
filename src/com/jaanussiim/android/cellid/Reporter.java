@@ -22,18 +22,15 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
-import sun.awt.windows.ThemeReader;
+import com.google.gson.Gson;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.Logger;
 
 public class Reporter extends HttpServlet {
   private static int VALUE_UNKNOWN = -1;
@@ -68,13 +65,14 @@ public class Reporter extends HttpServlet {
 
     if (stateListener == null) {
       PrintWriter writer = resp.getWriter();
-      writer.println("no listener");
+      writer.println("{\"status\"=\"invalid\"}");
       return;
     }
 
     CellInfo cellInfo = stateListener.getCurrentCellInfo();
     PrintWriter writer = resp.getWriter();
-    writer.println(cellInfo.toString());
+    Gson gson = new Gson();
+    writer.println(gson.toJson(cellInfo));
     writer.flush();
   }
 
@@ -123,45 +121,51 @@ public class Reporter extends HttpServlet {
 
   static class CellInfo {
     private final int cellId;
-    private final int locationAreaCode;
-    private final int mobileCountryCode;
-    private final int mobileNetworkCode;
+    private final int lac;
+    private final int mcc;
+    private final int mnc;
+    private final String status;
 
     public CellInfo(final int cellId, final int locationAreaCode, final int mobileCountryCode,
                     final int mobileNetworkCode) {
       this.cellId = cellId;
-      this.locationAreaCode = locationAreaCode;
-      this.mobileCountryCode = mobileCountryCode;
-      this.mobileNetworkCode = mobileNetworkCode;
+      this.lac = locationAreaCode;
+      this.mcc = mobileCountryCode;
+      this.mnc = mobileNetworkCode;
+      status = getStatus();
     }
 
     public int getCellId() {
       return cellId;
     }
 
-    public int getLocationAreaCode() {
-      return locationAreaCode;
+    public int getLAC() {
+      return lac;
     }
 
-    public int getMobileCountryCode() {
-      return mobileCountryCode;
+    public int getMCC() {
+      return mcc;
     }
 
-    public int getMobileNetworkCode() {
-      return mobileNetworkCode;
+    public int getMNC() {
+      return mnc;
+    }
+
+    public String getStatus() {
+      return validForMeasuring() ? "valid" : "invalid";
     }
 
     public String toString() {
       return new StringBuffer("cellid = ").append(cellId).append(" : mnc = ").append(
-          mobileNetworkCode).append(" : mcc = ").append(mobileCountryCode).append(" : lac = ")
-          .append(locationAreaCode).toString();
+          mnc).append(" : mcc = ").append(mcc).append(" : lac = ")
+          .append(lac).toString();
     }
 
     public boolean validForMeasuring() {
       return cellId != VALUE_UNKNOWN
-          && mobileNetworkCode != VALUE_UNKNOWN
-          && mobileCountryCode != VALUE_UNKNOWN
-          && locationAreaCode != VALUE_UNKNOWN;
+          && mnc != VALUE_UNKNOWN
+          && mcc != VALUE_UNKNOWN
+          && lac != VALUE_UNKNOWN;
     }
   }
 }
